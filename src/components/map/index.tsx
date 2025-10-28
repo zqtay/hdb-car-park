@@ -2,7 +2,6 @@ import { useMemo, type FC } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapProps } from './types';
-import L from 'leaflet';
 import { getPositionIcon } from './icons';
 
 const Map: FC<MapProps> = ({
@@ -11,7 +10,7 @@ const Map: FC<MapProps> = ({
   const markerComponents = useMemo(() => {
     return markers?.map((marker, index) => (
       <Marker key={index} position={marker.position}>
-        {marker.popupText && <Popup>{marker.popupText}</Popup>}
+        {marker.popup && <Popup>{marker.popup}</Popup>}
       </Marker>
     ));
   }, [markers]);

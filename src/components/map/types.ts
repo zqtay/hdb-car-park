@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
+
 export type MapProps = {
   center?: [number, number];
   zoom?: number;
   markers?: Array<{
     position: [number, number];
-    popupText?: string;
+    popup?: ReactNode;
   }>;
   height?: string | number;
   width?: string | number;
