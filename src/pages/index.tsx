@@ -4,14 +4,14 @@ import { GPSContext } from '../context/gps';
 import { DataGovService } from "../services/data-gov";
 import type { CarParkAvailabilityResponse, CarParkInfoResponse } from "../services/data-gov/types";
 import { SVY21Converter } from "../lib/map";
+import { useCarParkInfo } from "./hooks";
 
 const defaultCenter: [number, number] = [1.3550946, 103.7992184];
 
 const AppPage = () => {
   const { gpsData, watchLocation } = useContext(GPSContext);
-  const [info, setInfo] = useState<CarParkInfoResponse["result"]["records"]>();
+  const info = useCarParkInfo();
   const [availability, setAvailability] = useState<CarParkAvailabilityResponse["items"][number]>();
-  const [key, setKey] = useState(0);
 
   const position = useMemo(() => {
     const { latitude, longitude } = gpsData?.coordinates || {};
@@ -51,25 +51,18 @@ const AppPage = () => {
     // Track GPS
     watchLocation();
     // Get car park Info
-    DataGovService.getCarParkInfo()
-      .then(data => {
-        setInfo(data.result.records);
-      });
+
     // Get car park availability periodically
     let intervalId;
     const fetchAvailability = async () => {
       const data = await DataGovService.getCarParkAvailability();
       setAvailability(data.items?.[0]);
     };
-    intervalId = setInterval(fetchAvailability, 10000); // Refresh every 60 seconds
+    intervalId = setInterval(fetchAvailability, 10000); // Refresh every 10 seconds
     return () => {
       clearInterval(intervalId);
     };
   }, []);
-
-  useEffect(() => {
-    console.log(markers);
-  }, [markers]);
 
   return (<>
     <Map
