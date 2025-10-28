@@ -5,4 +5,11 @@ export type MapProps = {
     position: [number, number];
     popupText?: string;
   }>;
+  height?: string | number;
+  width?: string | number;
+  position?: {
+    latitude: number;
+    longitude: number;
+    heading?: number | null;
+  } | null;
 };
