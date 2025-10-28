@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 export type MapProps = {
   center?: [number, number];
   zoom?: number;
+  onZoom?: (zoom: number) => void;
   markers?: Array<{
     position: [number, number];
     popup?: ReactNode;

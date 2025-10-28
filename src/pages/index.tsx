@@ -12,6 +12,7 @@ const AppPage = () => {
   const { gpsData, watchLocation } = useContext(GPSContext);
   const info = useCarParkInfo();
   const [availability, setAvailability] = useState<CarParkAvailabilityResponse["items"][number]>();
+  const [zoom, setZoom] = useState(15);
 
   const position = useMemo(() => {
     const { latitude, longitude } = gpsData?.coordinates || {};
@@ -27,6 +28,7 @@ const AppPage = () => {
 
   const markers = useMemo(() => {
     if (!info || !availability) return [];
+    if (zoom < 15) return [];
     return info.map(carPark => {
       const availData = availability.carpark_data.find(cd => cd.carpark_number === carPark.car_park_no);
       const position = SVY21Converter.toLatLon(parseFloat(carPark.y_coord), parseFloat(carPark.x_coord));
@@ -37,7 +39,12 @@ const AppPage = () => {
           <div style={{ fontWeight: "bold" }}>
             {carPark.address} <span style={{ fontSize: "0.75rem" }}>{carPark.car_park_no}</span>
           </div>
-          {`Available Lots: ${availData ? availData.carpark_info.map(ci => ci.lots_available).join(", ") : "N/A"}`}
+          <div>
+            {`Available Lots: ${availData ? availData.carpark_info.map(ci => ci.lots_available).join(", ") : "N/A"}`}
+          </div>
+          <div>
+            {`Total Lots: ${availData ? availData.carpark_info.map(ci => ci.total_lots).join(", ") : "N/A"}`}
+          </div>
         </>,
         info: {
           carPark,
@@ -66,13 +73,13 @@ const AppPage = () => {
 
   return (<>
     <Map
-      key={key}
       center={center}
-      zoom={gpsData?.coordinates ? 15 : 12}
+      zoom={zoom}
       height={"100vh"}
       width={"100vw"}
       position={gpsData?.coordinates}
       markers={markers}
+      onZoom={e => {console.log(e); setZoom(e);}}
     />
   </>);
 };

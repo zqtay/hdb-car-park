@@ -1,11 +1,12 @@
 import { useMemo, type FC } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapProps } from './types';
 import { getPositionIcon } from './icons';
+import { ZoomHandler } from "./zoom";
 
 const Map: FC<MapProps> = ({
-  center, zoom, position, markers, height, width
+  center, zoom, position, markers, height, width, onZoom
 }) => {
   const markerComponents = useMemo(() => {
     return markers?.map((marker, index) => (
@@ -28,6 +29,7 @@ const Map: FC<MapProps> = ({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <ZoomHandler onZoom={onZoom} />
       {markerComponents}
       {position && (
         <Marker
@@ -39,6 +41,6 @@ const Map: FC<MapProps> = ({
       )}
     </MapContainer>
   );
-}
+};
 
 export default Map;
