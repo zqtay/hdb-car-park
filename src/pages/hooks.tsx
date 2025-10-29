@@ -1,6 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CarParkAvailabilityResponse, CarParkInfoResponse, PlanningAreaResponse, SubzoneBoundaryResponse } from "../services/data-gov/types";
 import { DataGovService } from "../services/data-gov";
+import { SVY21Converter } from "../lib/map";
+import type { CarParkData } from "./types";
+import { CircleMarker, Popup } from "react-leaflet";
+import type { MapBounds } from "../components/map/types";
+
+const getCapacityColor = (value?: number, total?: number) => {
+  if (value === undefined || total === undefined) {
+    return "rgb(128, 128, 128)"; // Gray for unknown
+  }
+  const percentage = value / total;
+  const r = percentage < 0.5 ? 255 : Math.floor(255 - (percentage * 2 - 1) * 255);
+  const g = percentage > 0.5 ? 255 : Math.floor((percentage * 2) * 255);
+  return `rgb(${r}, ${g}, 0)`;
+};
 
 export const useCarParkInfo = () => {
   const [data, setData] = useState<CarParkInfoResponse["result"]["records"]>([]);
@@ -71,5 +85,62 @@ export const useFetchData = () => {
   const availability = useCarParkAvailbaility();
   const planningArea = usePlanningArea();
   const subzoneBoundary = useSubzoneBoundary();
-  return { info, availability, planningArea, subzoneBoundary };
+
+  const data = useMemo(() => {
+    if (!Array.isArray(info)) return [];
+    return info.map(carPark => {
+      const availData = availability?.carpark_data.find(cd => cd.carpark_number === carPark.car_park_no);
+      const position = SVY21Converter.toLatLon(parseFloat(carPark.y_coord), parseFloat(carPark.x_coord));
+
+      return {
+        position: [position.latitude, position.longitude] as [number, number],
+        info: carPark,
+        availability: availData,
+      };
+    });
+  }, [info, availability]);
+
+  return { data, planningArea, subzoneBoundary };
+};
+
+export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefined) => {
+  const dataInView = useMemo(() => {
+    // Filter only car parks within bounds
+    if (!bounds) return data;
+    return data.filter(({ position }) => {
+      const [lat, lon] = position;
+      return lat >= bounds.south &&
+        lat <= bounds.north &&
+        lon >= bounds.west &&
+        lon <= bounds.east;
+    });
+  }, [data]);
+
+  const markerComponents = useMemo(() => {
+    return data?.map(({ position, info, availability }, index) => {
+      // Sum all lots
+      const availableLots = availability?.carpark_info.reduce((acc, cur) => acc + parseInt(cur.lots_available), 0);
+      const totalLots = availability?.carpark_info.reduce((acc, cur) => acc + parseInt(cur.total_lots), 0);
+      const popup = <>
+        <div style={{ fontWeight: "bold" }}>
+          {info.address} <span style={{ fontSize: "0.75rem" }}>{info.car_park_no}</span>
+        </div>
+        <div>
+          {`Available Lots: ${availableLots ?? "N/A"}`}
+        </div>
+        <div>
+          {`Total Lots: ${totalLots ?? "N/A"}`}
+        </div>
+      </>;
+      return <CircleMarker
+        key={index}
+        center={position}
+        color={getCapacityColor(availableLots, totalLots)}
+      >
+        <Popup>{popup}</Popup>
+      </CircleMarker>
+    });
+  }, [dataInView]);
+
+  return markerComponents;
 };
