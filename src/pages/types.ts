@@ -4,8 +4,8 @@ import type { CarParkAvailabilityResponse, CarParkInfoResponse } from "../servic
 export const defaultCenter: [number, number] = [1.366666, 103.833333];
 
 export const ZoomLevel = {
-  PlanningArea: 14,
-  Subzone: 16,
+  PlanningArea: 12,
+  Subzone: 15,
 } as const;
 
 export type ZoomLevel = typeof ZoomLevel[keyof typeof ZoomLevel];

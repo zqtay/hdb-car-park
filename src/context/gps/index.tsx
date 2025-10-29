@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { PermissionState } from './types';
 import type { GPSContextType, GPSData } from './types';
@@ -270,4 +270,25 @@ export const GPSProvider: React.FC<GPSProviderProps> = ({
       {children}
     </GPSContext.Provider>
   );
+};
+
+// Custom hook to use GPS context
+export const useGPS = (): GPSContextType => {
+  const context = useContext(GPSContext);
+  if (context === undefined) {
+    throw new Error('useGPS must be used within a GPSProvider');
+  }
+  return context;
+};
+
+// Helper hook for easy coordinate access
+export const useCoordinates = () => {
+  const { gpsData } = useGPS();
+  return gpsData.coordinates;
+};
+
+// Helper hook for permission status
+export const useGPSPermission = () => {
+  const { permissionState, requestLocation } = useGPS();
+  return { permissionState, requestLocation };
 };
