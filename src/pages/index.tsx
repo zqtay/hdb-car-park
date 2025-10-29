@@ -1,19 +1,18 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import Map from '../components/map';
 import { GPSContext } from '../context/gps';
-import { useCarParkAreaCapacityLayer, useCarParkMarker, useCarParkZoneCapacityLayer, useFetchData } from "./hooks";
+import { useCarParkMapLayer, useCarParkMarker, useCarParkRegionLayer, useFetchData } from "./hooks";
 import { defaultCenter, ZoomLevel } from './types';
 import type { MapBounds } from '../components/map/types';
 
 const AppPage = () => {
   const { gpsData, watchLocation } = useContext(GPSContext);
-  const { data, planningArea: area, subzoneBoundary: zone } = useFetchData();
   const [zoom, setZoom] = useState(15);
   const [bounds, setBounds] = useState<MapBounds>();
 
+  const { data, planningArea: area, subzoneBoundary: zone } = useFetchData();
   const markers = useCarParkMarker(data, bounds);
-  const areaLayer = useCarParkAreaCapacityLayer(data, area);
-  const zoneLayer = useCarParkZoneCapacityLayer(data, zone);
+  const {areaLayer, zoneLayer} = useCarParkMapLayer({ data, area, zone });
 
   const position = useMemo(() => {
     const { latitude, longitude } = gpsData?.coordinates || {};

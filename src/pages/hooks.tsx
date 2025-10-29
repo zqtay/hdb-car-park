@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CarParkAvailabilityResponse, CarParkInfoResponse, PlanningAreaResponse, SubzoneBoundaryResponse } from "../services/data-gov/types";
 import { DataGovService } from "../services/data-gov";
-import { isPointWithinArea, SVY21Converter } from "../lib/map";
-import type { CarParkData } from "./types";
+import { SVY21Converter } from "../lib/map";
+import type { CarParkData, CarParkRegionData } from "./types";
 import { CircleMarker, Popup, GeoJSON } from "react-leaflet";
 import type { MapBounds } from "../components/map/types";
+import { WorkerOperation } from "../workers/types";
+import type { GeoJsonData } from "../lib/map/types";
+import Worker from '../workers/carpark?worker';
 
 const getCapacityColor = (value?: number, total?: number) => {
   if (value === undefined || total === undefined) {
@@ -146,70 +149,80 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
   return markerComponents;
 };
 
-export const useCarParkAreaCapacityLayer = (data: CarParkData[], area?: PlanningAreaResponse["features"]) => {
+export const useCarParkRegionLayer = (data: CarParkRegionData[]) => {
   const components = useMemo(() => {
-    return area?.map((feature, index) => {
-      // Get car parks within area
-      const carParksInArea = data.filter(({ position }) => {
-        return isPointWithinArea(position, feature.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]));
-      });
-      // Sum all lots
-      const availableLots = carParksInArea.reduce((acc, cur) => {
-        const avail = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.lots_available), 0) || 0;
-        return acc + avail;
-      }, 0);
-      const totalLots = carParksInArea.reduce((acc, cur) => {
-        const total = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.total_lots), 0) || 0;
-        return acc + total;
-      }, 0);
-
+    return data?.map((d, index) => {
       return <GeoJSON
         key={index}
-        data={feature}
+        data={d.feature}
         style={
           {
-            color: getCapacityColor(availableLots, totalLots),
+            color: getCapacityColor(d.lots.available, d.lots.total),
             weight: 2,
             fillOpacity: 0.3,
           }
         }
       />;
     });
-  }, [data, area]);
+  }, [data]);
 
   return components;
 };
 
-export const useCarParkZoneCapacityLayer = (data: CarParkData[], area?: SubzoneBoundaryResponse["features"]) => {
-  const components = useMemo(() => {
-    return area?.map((feature, index) => {
-      // Get car parks within area
-      const carParksInArea = data.filter(({ position }) => {
-        return isPointWithinArea(position, feature.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]));
-      });
-      // Sum all lots
-      const availableLots = carParksInArea.reduce((acc, cur) => {
-        const avail = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.lots_available), 0) || 0;
-        return acc + avail;
-      }, 0);
-      const totalLots = carParksInArea.reduce((acc, cur) => {
-        const total = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.total_lots), 0) || 0;
-        return acc + total;
-      }, 0);
+export const useCarParkMapLayer = ({
+  data, area, zone
+}: {
+  data: CarParkData[];
+  area?: GeoJsonData[];
+  zone?: GeoJsonData[];
+}) => {
+  const [areaCapacity, setAreaCapacity] = useState([]);
+  const [zoneCapacity, setZoneCapacity] = useState([]);
+  const areaLayer = useCarParkRegionLayer(areaCapacity);
+  const zoneLayer = useCarParkRegionLayer(zoneCapacity);
 
-      return <GeoJSON
-        key={index}
-        data={feature}
-        style={
-          {
-            color: getCapacityColor(availableLots, totalLots),
-            weight: 2,
-            fillOpacity: 0.3,
-          }
-        }
-      />;
+  const [worker, setWorker] = useState<Worker>();
+
+  useEffect(() => {
+    const _worker = new Worker();
+    _worker.onmessage = (e: MessageEvent<any>) => {
+      const { operation, data } = e.data;
+      if (operation === WorkerOperation.GetAreaCapacity) {
+        setAreaCapacity(data);
+      } else if (operation === WorkerOperation.GetZoneCapacity) {
+        setZoneCapacity(data);
+      }
+    };
+    setWorker(_worker);
+    return () => {
+      _worker.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!data) return;
+    worker?.postMessage({
+      operation: WorkerOperation.GetAreaCapacity,
+      data: {
+        carParkData: data,
+        areaData: area,
+      }
     });
   }, [data, area]);
 
-  return components;
+  useEffect(() => {
+    if (!data) return;
+    worker?.postMessage({
+      operation: WorkerOperation.GetZoneCapacity,
+      data: {
+        carParkData: data,
+        zoneData: zone,
+      }
+    });
+  }, [data, zone]);
+
+  return {
+    areaLayer,
+    zoneLayer,
+  };
 };
