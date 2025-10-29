@@ -1,21 +1,14 @@
-import { useMemo, type FC } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { type FC } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapProps } from './types';
 import { getPositionIcon } from './icons';
 import { ZoomHandler } from "./zoom";
+import { BoundsHandler } from "./bounds";
 
 const Map: FC<MapProps> = ({
-  center, zoom, position, markers, height, width, onZoom
+  center, zoom, position, height, width, onZoom, onBoundsChange, children
 }) => {
-  const markerComponents = useMemo(() => {
-    return markers?.map((marker, index) => (
-      <Marker key={index} position={marker.position}>
-        {marker.popup && <Popup>{marker.popup}</Popup>}
-      </Marker>
-    ));
-  }, [markers]);
-
   return (
     <MapContainer
       center={center}
@@ -30,7 +23,7 @@ const Map: FC<MapProps> = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <ZoomHandler onZoom={onZoom} />
-      {markerComponents}
+      <BoundsHandler onBoundsChange={onBoundsChange} />
       {position && (
         <Marker
           position={[position.latitude, position.longitude]}
@@ -39,6 +32,7 @@ const Map: FC<MapProps> = ({
           <Popup>Your Position</Popup>
         </Marker>
       )}
+      {children}
     </MapContainer>
   );
 };

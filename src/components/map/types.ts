@@ -1,13 +1,19 @@
-import type { ReactNode } from "react";
+export type MapBounds = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+  center: {
+    lat: number;
+    lng: number;
+  };
+};
 
 export type MapProps = {
   center?: [number, number];
   zoom?: number;
   onZoom?: (zoom: number) => void;
-  markers?: Array<{
-    position: [number, number];
-    popup?: ReactNode;
-  }>;
+  onBoundsChange?: (bounds: MapBounds) => void;
   height?: string | number;
   width?: string | number;
   position?: {
@@ -15,4 +21,14 @@ export type MapProps = {
     longitude: number;
     heading?: number | null;
   } | null;
+  children?: any;
+};
+
+export type GeoJsonData = {
+  type: "Feature";
+  geometry: {
+    type: "Point" | "LineString" | "Polygon";
+    coordinates: any;
+  };
+  properties: { [key: string]: any };
 };
