@@ -1,17 +1,14 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import Map from '../components/map';
 import { GPSContext } from '../context/gps';
-import { DataGovService } from "../services/data-gov";
-import type { CarParkAvailabilityResponse, CarParkInfoResponse } from "../services/data-gov/types";
 import { SVY21Converter } from "../lib/map";
-import { useCarParkInfo } from "./hooks";
+import { useFetchData } from "./hooks";
 
 const defaultCenter: [number, number] = [1.3550946, 103.7992184];
 
 const AppPage = () => {
   const { gpsData, watchLocation } = useContext(GPSContext);
-  const info = useCarParkInfo();
-  const [availability, setAvailability] = useState<CarParkAvailabilityResponse["items"][number]>();
+  const { info, availability, planningArea, subzoneBoundary } = useFetchData();
   const [zoom, setZoom] = useState(15);
 
   const position = useMemo(() => {
@@ -57,18 +54,6 @@ const AppPage = () => {
   useEffect(() => {
     // Track GPS
     watchLocation();
-    // Get car park Info
-
-    // Get car park availability periodically
-    let intervalId;
-    const fetchAvailability = async () => {
-      const data = await DataGovService.getCarParkAvailability();
-      setAvailability(data.items?.[0]);
-    };
-    intervalId = setInterval(fetchAvailability, 10000); // Refresh every 10 seconds
-    return () => {
-      clearInterval(intervalId);
-    };
   }, []);
 
   return (<>

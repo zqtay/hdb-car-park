@@ -47,3 +47,41 @@ export type CarParkAvailabilityResponse = {
     }>;
   }>;
 };
+
+export type PlanningAreaResponse = {
+  type: "FeatureCollection";
+  crs: {
+    type: string;
+    properties: { name: string }
+  };
+  features: Array<{
+    type: "Feature";
+    properties: {
+      Name: string;
+      Description: string;
+    };
+    geometry: {
+      type: string;
+      coordinates: Array<Array<[number, number, number]>>;
+    };
+  }>;
+};
+
+export type SubzoneBoundaryResponse = {
+  type: "FeatureCollection";
+  crs: {
+    type: string;
+    properties: { name: string }
+  };
+  features: Array<{
+    type: "Feature";
+    properties: {
+      Name: string;
+      Description: string;
+    };
+    geometry: {
+      type: string;
+      coordinates: Array<Array<[number, number, number]>>;
+    };
+  }>;
+};
