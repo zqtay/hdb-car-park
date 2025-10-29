@@ -113,26 +113,55 @@ export class SVY21Converter {
 }
 
 /**
- * Check point is in the polygon area
+ * Check point is in the polygon area using ray casting algorithm
  * @param point [lat, lon]
- * @param area [lat, lon][]
+ * @param area [lat, lon][] - polygon vertices in order
+ * @returns boolean - true if point is inside the polygon
  */
 export const isPointWithinArea = (
   point: [number, number],
   area: [number, number][],
-) => {
-  let inside = false;
-  const x = point[1];
-  const y = point[0];
-  for (let i = 0, j = area.length - 1; i < area.length; j = i++) {
-    const xi = area[i][1];
-    const yi = area[i][0];
-    const xj = area[j][1];
-    const yj = area[j][0];
-
-    const intersect = ((yi > y) !== (yj > y)) &&
-      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
+): boolean => {
+  // Validate inputs
+  if (!point || !area || area.length < 3) {
+    return false;
   }
+
+  const [lat, lon] = point;
+  
+  // Handle invalid coordinates
+  if (typeof lat !== 'number' || typeof lon !== 'number' || 
+      !isFinite(lat) || !isFinite(lon)) {
+    return false;
+  }
+
+  let inside = false;
+  const n = area.length;
+
+  // Ray casting algorithm: cast a ray from the point to infinity
+  // and count how many times it intersects with polygon edges
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const [lat_i, lon_i] = area[i];
+    const [lat_j, lon_j] = area[j];
+
+    // Skip invalid vertices
+    if (!isFinite(lat_i) || !isFinite(lon_i) || 
+        !isFinite(lat_j) || !isFinite(lon_j)) {
+      continue;
+    }
+
+    // Check if point is exactly on a vertex
+    if ((lat_i === lat && lon_i === lon) || 
+        (lat_j === lat && lon_j === lon)) {
+      return true;
+    }
+
+    // Check if the ray intersects with the edge
+    if (((lat_i > lat) !== (lat_j > lat)) &&
+        (lon < (lon_j - lon_i) * (lat - lat_i) / (lat_j - lat_i) + lon_i)) {
+      inside = !inside;
+    }
+  }
+
   return inside;
 };
