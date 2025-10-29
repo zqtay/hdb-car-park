@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CarParkAvailabilityResponse, CarParkInfoResponse, PlanningAreaResponse, SubzoneBoundaryResponse } from "../services/data-gov/types";
 import { DataGovService } from "../services/data-gov";
-import { SVY21Converter } from "../lib/map";
+import { isPointWithinArea, SVY21Converter } from "../lib/map";
 import type { CarParkData } from "./types";
-import { CircleMarker, Popup } from "react-leaflet";
+import { CircleMarker, Popup, GeoJSON } from "react-leaflet";
 import type { MapBounds } from "../components/map/types";
 
 const getCapacityColor = (value?: number, total?: number) => {
@@ -121,6 +121,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
       // Sum all lots
       const availableLots = availability?.carpark_info.reduce((acc, cur) => acc + parseInt(cur.lots_available), 0);
       const totalLots = availability?.carpark_info.reduce((acc, cur) => acc + parseInt(cur.total_lots), 0);
+      // Popup text
       const popup = <>
         <div style={{ fontWeight: "bold" }}>
           {info.address} <span style={{ fontSize: "0.75rem" }}>{info.car_park_no}</span>
@@ -143,4 +144,72 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
   }, [dataInView]);
 
   return markerComponents;
+};
+
+export const useCarParkAreaCapacityLayer = (data: CarParkData[], area?: PlanningAreaResponse["features"]) => {
+  const components = useMemo(() => {
+    return area?.map((feature, index) => {
+      // Get car parks within area
+      const carParksInArea = data.filter(({ position }) => {
+        return isPointWithinArea(position, feature.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]));
+      });
+      // Sum all lots
+      const availableLots = carParksInArea.reduce((acc, cur) => {
+        const avail = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.lots_available), 0) || 0;
+        return acc + avail;
+      }, 0);
+      const totalLots = carParksInArea.reduce((acc, cur) => {
+        const total = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.total_lots), 0) || 0;
+        return acc + total;
+      }, 0);
+
+      return <GeoJSON
+        key={index}
+        data={feature}
+        style={
+          {
+            color: getCapacityColor(availableLots, totalLots),
+            weight: 2,
+            fillOpacity: 0.3,
+          }
+        }
+      />;
+    });
+  }, [data, area]);
+
+  return components;
+};
+
+export const useCarParkZoneCapacityLayer = (data: CarParkData[], area?: SubzoneBoundaryResponse["features"]) => {
+  const components = useMemo(() => {
+    return area?.map((feature, index) => {
+      // Get car parks within area
+      const carParksInArea = data.filter(({ position }) => {
+        return isPointWithinArea(position, feature.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]));
+      });
+      // Sum all lots
+      const availableLots = carParksInArea.reduce((acc, cur) => {
+        const avail = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.lots_available), 0) || 0;
+        return acc + avail;
+      }, 0);
+      const totalLots = carParksInArea.reduce((acc, cur) => {
+        const total = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.total_lots), 0) || 0;
+        return acc + total;
+      }, 0);
+
+      return <GeoJSON
+        key={index}
+        data={feature}
+        style={
+          {
+            color: getCapacityColor(availableLots, totalLots),
+            weight: 2,
+            fillOpacity: 0.3,
+          }
+        }
+      />;
+    });
+  }, [data, area]);
+
+  return components;
 };

@@ -15,3 +15,15 @@ export interface WGS84Coordinate {
   latitude: number;
   longitude: number;
 }
+
+export type GeoJsonData = {
+  type: "Feature";
+  properties: {
+    Name: string;
+    Description: string;
+  };
+  geometry: {
+    type: string;
+    coordinates: Array<Array<[number, number, number]>>;
+  };
+};

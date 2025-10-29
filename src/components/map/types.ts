@@ -23,12 +23,3 @@ export type MapProps = {
   } | null;
   children?: any;
 };
-
-export type GeoJsonData = {
-  type: "Feature";
-  geometry: {
-    type: "Point" | "LineString" | "Polygon";
-    coordinates: any;
-  };
-  properties: { [key: string]: any };
-};

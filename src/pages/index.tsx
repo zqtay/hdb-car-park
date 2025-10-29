@@ -1,8 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { GeoJSON } from 'react-leaflet';
 import Map from '../components/map';
 import { GPSContext } from '../context/gps';
-import { useCarParkMarker, useFetchData } from "./hooks";
+import { useCarParkAreaCapacityLayer, useCarParkMarker, useCarParkZoneCapacityLayer, useFetchData } from "./hooks";
 import { defaultCenter, ZoomLevel } from './types';
 import type { MapBounds } from '../components/map/types';
 
@@ -13,6 +12,8 @@ const AppPage = () => {
   const [bounds, setBounds] = useState<MapBounds>();
 
   const markers = useCarParkMarker(data, bounds);
+  const areaLayer = useCarParkAreaCapacityLayer(data, area);
+  const zoneLayer = useCarParkZoneCapacityLayer(data, zone);
 
   const position = useMemo(() => {
     const { latitude, longitude } = gpsData?.coordinates || {};
@@ -41,12 +42,8 @@ const AppPage = () => {
       onZoom={setZoom}
       onBoundsChange={setBounds}
     >
-      {(area && zoom < ZoomLevel.PlanningArea) &&
-        area.map((e, i) => <GeoJSON key={i} data={e} />)
-      }
-      {(zone && zoom >= ZoomLevel.PlanningArea && zoom < ZoomLevel.Subzone) &&
-        zone.map((e, i) => <GeoJSON key={i} data={e} />)
-      }
+      {(areaLayer && zoom < ZoomLevel.PlanningArea) && areaLayer}
+      {(zoneLayer && zoom >= ZoomLevel.PlanningArea && zoom < ZoomLevel.Subzone) && zoneLayer }
       {(markers && zoom >= ZoomLevel.Subzone) && markers}
     </Map>
   </>);
