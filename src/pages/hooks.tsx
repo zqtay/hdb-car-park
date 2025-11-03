@@ -40,7 +40,7 @@ export const useCarParkInfo = () => {
   return data;
 };
 
-export const useCarParkAvailbaility = () => {
+export const useCarParkAvailability = () => {
   const [data, setData] = useState<CarParkAvailabilityResponse["items"][number]>();
 
   useEffect(() => {
@@ -50,6 +50,8 @@ export const useCarParkAvailbaility = () => {
       const data = await DataGovService.getCarParkAvailability();
       setData(data.items?.[0]);
     };
+    // Fetch initial
+    fetchAvailability();
     intervalId = setInterval(fetchAvailability, 10000); // Refresh every 10 seconds
     return () => {
       clearInterval(intervalId);
@@ -85,7 +87,7 @@ export const useSubzoneBoundary = () => {
 
 export const useFetchData = () => {
   const info = useCarParkInfo();
-  const availability = useCarParkAvailbaility();
+  const availability = useCarParkAvailability();
   const planningArea = usePlanningArea();
   const subzoneBoundary = useSubzoneBoundary();
 
@@ -120,7 +122,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
   }, [data]);
 
   const markerComponents = useMemo(() => {
-    return data?.map(({ position, info, availability }, index) => {
+    return dataInView?.map(({ position, info, availability }, index) => {
       // Sum all lots
       const availableLots = availability?.carpark_info.reduce((acc, cur) => acc + parseInt(cur.lots_available), 0);
       const totalLots = availability?.carpark_info.reduce((acc, cur) => acc + parseInt(cur.total_lots), 0);
@@ -137,7 +139,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
         </div>
       </>;
       return <CircleMarker
-        key={index}
+        key={`${info.car_park_no}-${info.address}-${index}`}
         center={position}
         color={getCapacityColor(availableLots, totalLots)}
       >
@@ -153,7 +155,7 @@ export const useCarParkRegionLayer = (data: CarParkRegionData[]) => {
   const components = useMemo(() => {
     return data?.map((d, index) => {
       return <GeoJSON
-        key={index}
+        key={`${d.feature.properties.Name}-${index}`}
         data={d.feature}
         style={
           {

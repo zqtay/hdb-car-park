@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapProps } from './types';
 import { getPositionIcon } from './icons';
@@ -19,6 +19,8 @@ const Map: FC<MapProps> = ({
           height: "100%",
           width: "100%"
         }}
+        zoomSnap={0.25}
+        zoomDelta={0.25}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -27,6 +29,7 @@ const Map: FC<MapProps> = ({
         <ZoomHandler onZoom={onZoom} />
         <BoundsHandler onBoundsChange={onBoundsChange} />
         <GPSCenterButton />
+        <ScaleControl position="bottomleft" />
         {position && (
           <Marker
             position={[position.latitude, position.longitude]}
