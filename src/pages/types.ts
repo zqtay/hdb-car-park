@@ -6,6 +6,7 @@ export const defaultCenter: [number, number] = [1.366666, 103.833333];
 export const ZoomLevel = {
   PlanningArea: 12,
   Subzone: 15,
+  Street: 18,
 } as const;
 
 export type ZoomLevel = typeof ZoomLevel[keyof typeof ZoomLevel];

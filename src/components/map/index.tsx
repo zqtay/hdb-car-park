@@ -1,5 +1,6 @@
-import { type FC, useState } from 'react';
-import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
+import { type FC, forwardRef, useRef, useState } from 'react';
+import { MapContainer, TileLayer, ScaleControl, ZoomControl } from 'react-leaflet';
+import type { MapRef } from 'react-leaflet/MapContainer';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import type { MapProps } from './types';
@@ -9,17 +10,14 @@ import { GPSCenterButton } from "./gps/button";
 import { MapTileToggle, tileLayerConfig, type MapTileType } from "./ui/tile-toggle";
 import { PositionIcon } from './gps/icon';
 
-const Map: FC<MapProps> = ({
-  center, zoom, height, width, onZoom, onBoundsChange, children
-}) => {
+const Map = forwardRef<MapRef, MapProps>(
+  ({ center, zoom, height, width, onZoom, onBoundsChange, children }, ref
+) => {
   const [currentTile, setCurrentTile] = useState<MapTileType>('map');
-
-  const handleTileChange = (tile: MapTileType) => {
-    setCurrentTile(tile);
-  };
 
   return (
     <MapContainer
+      ref={ref}
       center={center}
       zoom={zoom}
       style={{
@@ -28,6 +26,7 @@ const Map: FC<MapProps> = ({
       }}
       zoomSnap={0.25}
       zoomDelta={0.25}
+      zoomControl={false}
     >
       <TileLayer
         key={currentTile}
@@ -36,13 +35,14 @@ const Map: FC<MapProps> = ({
       />
       <ZoomHandler onZoom={onZoom} />
       <BoundsHandler onBoundsChange={onBoundsChange} />
-      <MapTileToggle onTileChange={handleTileChange} />
+      <MapTileToggle onTileChange={setCurrentTile} />
       <GPSCenterButton />
       <PositionIcon />
       <ScaleControl position="bottomleft" />
+      <ZoomControl position="bottomleft" />
       {children}
     </MapContainer>
   );
-};
+});
 
 export default Map;
