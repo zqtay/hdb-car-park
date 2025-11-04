@@ -53,23 +53,37 @@ export const useCarParkInfo = () => {
   return data;
 };
 
-export const useCarParkAvailability = () => {
+export const useCarParkAvailability = (timestamp?: Date) => {
   const [data, setData] = useState<CarParkAvailabilityResponse["items"][number]>();
 
   useEffect(() => {
-    // Get car park availability periodically
-    let intervalId;
-    const fetchAvailability = async () => {
-      const data = await DataGovService.getCarParkAvailability();
-      setData(data.items?.[0]);
-    };
-    // Fetch initial
-    fetchAvailability();
-    intervalId = setInterval(fetchAvailability, 10000); // Refresh every 10 seconds
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
+    if (!timestamp) {
+      // Get car park availability periodically
+      let intervalId;
+      const fetchAvailability = async () => {
+        const data = await DataGovService.getCarParkAvailability();
+        setData(data.items?.[0]);
+      };
+      // Fetch initial
+      fetchAvailability();
+      intervalId = setInterval(fetchAvailability, 10000); // Refresh every 10 seconds
+      return () => {
+        clearInterval(intervalId);
+      };
+    } else {
+      // Get car park availability at specific timestamp
+      const fetchHistoricalData = async () => {
+        try {
+          const data = await DataGovService.getCarParkAvailability(timestamp.toISOString());
+          setData(data.items?.[0]);
+        } catch (error) {
+          console.warn('Historical data not available for timestamp:', timestamp);
+          setData(undefined);
+        }
+      };
+      fetchHistoricalData();
+    }
+  }, [timestamp]);
 
   return data;
 };
@@ -98,9 +112,9 @@ export const useSubzoneBoundary = () => {
   return data;
 };
 
-export const useFetchData = () => {
+export const useFetchData = (timestamp?: Date) => {
   const info = useCarParkInfo();
-  const availability = useCarParkAvailability();
+  const availability = useCarParkAvailability(timestamp);
   const planningArea = usePlanningArea();
   const subzoneBoundary = useSubzoneBoundary();
 
@@ -155,7 +169,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
       const fillColor = getCapacityColor(availableLots, totalLots) ?? `rgb(0,0,0,0.5)`;
 
       return <CircleMarker
-        key={`${info.car_park_no}-${info.address}-${index}`}
+        key={`${info.car_park_no}-${info.address}-${availability?.update_datetime}`}
         center={position}
         stroke={false}
         fillColor={fillColor}
@@ -190,7 +204,7 @@ export const useCarParkRegionLayer = (data: CarParkRegionData[]) => {
         </div>
       </>;
       return <GeoJSON
-        key={`${d.feature.properties.Name}-${index}`}
+        key={`${d.feature.properties.Name}-${d.info.carparks?.[0]?.availability?.update_datetime ?? ""}`}
         data={d.feature}
         style={
           {

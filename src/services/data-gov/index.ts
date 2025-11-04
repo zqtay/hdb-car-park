@@ -16,8 +16,13 @@ const getCarParkInfo = async (offset?: number, limit?: number): Promise<CarParkI
   return data;
 };
 
-const getCarParkAvailability = async (time?: string): Promise<CarParkAvailabilityResponse> => {
-  const url = "https://api.data.gov.sg/v1/transport/carpark-availability";
+const getCarParkAvailability = async (dateTime?: string): Promise<CarParkAvailabilityResponse> => {
+  let url = "https://api.data.gov.sg/v1/transport/carpark-availability";
+  
+  if (dateTime) {
+    url += `?date_time=${encodeURIComponent(dateTime)}`;
+  }
+  
   const res = await fetch(url);
   const data = res.json();
   return data;

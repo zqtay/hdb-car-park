@@ -1,0 +1,131 @@
+/* DateTime Slider Styles */
+.datetime-slider {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  min-width: 400px;
+  max-width: 600px;
+}
+
+.datetime-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.datetime-slider-title {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.datetime-slider-time {
+  font-size: 13px;
+  color: #1a73e8;
+  font-weight: 500;
+}
+
+.datetime-slider-relative {
+  font-size: 12px;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+
+.datetime-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.datetime-slider-label {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.datetime-slider-label:first-child {
+  text-align: right;
+}
+
+.datetime-slider-input {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #e0e0e0 0%, #1a73e8 100%);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.datetime-slider-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1a73e8;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.datetime-slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.datetime-slider-input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1a73e8;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.datetime-slider-input::-moz-range-thumb:hover {
+  transform: scale(1.1);
+}
+
+.datetime-slider-marks {
+  position: relative;
+  height: 20px;
+  margin-top: 4px;
+}
+
+.datetime-slider-mark {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.datetime-slider-mark-line {
+  width: 1px;
+  height: 6px;
+  background-color: #ccc;
+  margin-bottom: 2px;
+}
+
+.datetime-slider-mark-label {
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
+}

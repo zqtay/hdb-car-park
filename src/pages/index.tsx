@@ -1,6 +1,6 @@
 import "./styles.css";
 
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import Map from '../components/map';
 import { useCarParkMapLayer, useCarParkMarker, useFetchData } from "./hooks";
 import { defaultCenter, ZoomLevel } from './types';
@@ -10,14 +10,31 @@ import { ToggleSwitch } from '../components/ui/toggle-switch';
 import { CarParkSearch } from './search';
 import type { MapRef } from "react-leaflet/MapContainer";
 import { TogglePill } from "../components/ui/toggle-pill";
+import { DateTimeSlider } from '../components/ui/datetime-slider';
+
+// Debounce utility function
+const useDebounce = (callback: (...args: any[]) => void, delay: number) => {
+  const timeoutRef = useRef<number>(null);
+
+  return useCallback((...args: any[]) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      callback(...args);
+    }, delay);
+  }, [callback, delay]);
+};
 
 const AppPage = () => {
   const [zoom, setZoom] = useState(15);
   const [bounds, setBounds] = useState<MapBounds>();
   const [showUnavailable, setShowUnavailable] = useState(false);
+  const [selectedTimestamp, setSelectedTimestamp] = useState<Date>();
   const ref = useRef<MapRef>(null);
 
-  const { data, planningArea: area, subzoneBoundary: zone } = useFetchData();
+  const { data, planningArea: area, subzoneBoundary: zone } = useFetchData(selectedTimestamp);
   const filteredData = useMemo(() => {
     if (showUnavailable) return data;
     return data.filter(d => d.availability);
@@ -34,18 +51,31 @@ const AppPage = () => {
     });
   };
 
+  // Debounced timestamp handler to avoid excessive API calls
+  const debouncedSetTimestamp = useDebounce((timestamp: Date) => {
+    setSelectedTimestamp(timestamp);
+  }, 500); // 500ms delay
+
+  // Handle datetime slider changes with debouncing
+  const handleTimeChange = useCallback((timestamp: Date) => {
+    debouncedSetTimestamp(timestamp);
+  }, [debouncedSetTimestamp]);
+
   return (<>
     <CarParkSearch
       data={filteredData}
       onCarParkSelect={handleCarParkSelect}
     />
-    {zoom >= ZoomLevel.Subzone && <div className='filter-container'>
-      <TogglePill
+    <div className='filter-container'>
+      {zoom >= ZoomLevel.Subzone && <TogglePill
         checked={showUnavailable}
         onChange={setShowUnavailable}
         label="Show unavailable"
-      />
-    </div>}
+      />}
+    </div>
+    <DateTimeSlider
+      onTimeChange={handleTimeChange}
+    />
     <Map
       ref={ref}
       center={defaultCenter}
