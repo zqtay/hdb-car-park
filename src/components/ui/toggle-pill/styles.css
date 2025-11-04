@@ -1,0 +1,54 @@
+/* Toggle Pill Component Styles */
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 13px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  background-color: white;
+  background-clip: padding-box;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+/* Hide the default checkbox */
+.toggle-pill input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  display: none;
+}
+
+/* Checked state */
+.toggle-pill:has(input:checked) {
+  background-color: #1a73e8;
+}
+
+/* Label styles */
+.toggle-pill .toggle-label {
+  color: #333;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.toggle-pill input:checked + .toggle-label {
+  color: white;
+}
+
+/* Focus styles for accessibility */
+.toggle-pill:focus-within {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.toggle-pill:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
