@@ -1,0 +1,11 @@
+.toggle-switch-container {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  background-clip: padding-box;
+  padding: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}

@@ -1,5 +1,4 @@
-import './styles/app.css'
-import 'leaflet/dist/leaflet.css';
+import './styles/app.css';
 
 import { GPSProvider } from './context/gps';
 import AppPage from './pages';

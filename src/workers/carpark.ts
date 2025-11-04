@@ -9,15 +9,16 @@ const getCarParkRegionCapcity = (data: CarParkData[], area?: GeoJsonData[]) => {
     const carParksInArea = data.filter(({ position }) => {
       return isPointWithinArea(position, feature.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]));
     });
+    const hasAvailability = carParksInArea.some(cp => cp.availability);
     // Sum all lots
-    const availableLots = carParksInArea.reduce((acc, cur) => {
+    const availableLots = hasAvailability ? carParksInArea.reduce((acc, cur) => {
       const avail = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.lots_available), 0) || 0;
       return acc + avail;
-    }, 0);
-    const totalLots = carParksInArea.reduce((acc, cur) => {
+    }, 0) : undefined;
+    const totalLots = hasAvailability ? carParksInArea.reduce((acc, cur) => {
       const total = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.total_lots), 0) || 0;
       return acc + total;
-    }, 0);
+    }, 0) : undefined;
     return {
       feature,
       lots: {

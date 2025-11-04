@@ -9,14 +9,22 @@ import { WorkerOperation } from "../workers/types";
 import type { GeoJsonData } from "../lib/map/types";
 import Worker from '../workers/carpark?worker';
 
+// Color scale, from green = 100% to red = 0%, step = 5
+const colorScale = [
+  "rgb(255, 0, 0)",    // 1.0
+  "rgb(255, 127, 0)",  // 0.75
+  "rgb(255, 255, 0)",  // 0.5
+  "rgb(127, 255, 0)",  // 0.25
+  "rgb(0, 255, 0)",    // 0.0
+];
+
 const getCapacityColor = (value?: number, total?: number) => {
   if (value === undefined || total === undefined) {
-    return "rgb(128, 128, 128)"; // Gray for unknown
+    return `rgb(0,0,0,0.5)`; // Gray for unknown
   }
   const percentage = value / total;
-  const r = percentage < 0.5 ? 255 : Math.floor(255 - (percentage * 2 - 1) * 255);
-  const g = percentage > 0.5 ? 255 : Math.floor((percentage * 2) * 255);
-  return `rgb(${r}, ${g}, 0)`;
+  const index = Math.floor(percentage * (colorScale.length - 1));
+  return colorScale[index];
 };
 
 export const useCarParkInfo = () => {
@@ -119,7 +127,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
         lon >= bounds.west &&
         lon <= bounds.east;
     });
-  }, [data]);
+  }, [data, bounds]);
 
   const markerComponents = useMemo(() => {
     return dataInView?.map(({ position, info, availability }, index) => {
@@ -141,7 +149,9 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
       return <CircleMarker
         key={`${info.car_park_no}-${info.address}-${index}`}
         center={position}
-        color={getCapacityColor(availableLots, totalLots)}
+        stroke={false}
+        fillColor={getCapacityColor(availableLots, totalLots)}
+        fillOpacity={0.5}
       >
         <Popup>{popup}</Popup>
       </CircleMarker>
@@ -159,9 +169,10 @@ export const useCarParkRegionLayer = (data: CarParkRegionData[]) => {
         data={d.feature}
         style={
           {
-            color: getCapacityColor(d.lots.available, d.lots.total),
+            color: "#00000040",
+            fillColor: getCapacityColor(d.lots.available, d.lots.total),
             weight: 2,
-            fillOpacity: 0.3,
+            fillOpacity: 0.5,
           }
         }
       />;

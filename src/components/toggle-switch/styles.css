@@ -1,8 +1,7 @@
 .toggle-switch {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  cursor: pointer;
   user-select: none;
   gap: 8px;
 }
@@ -16,6 +15,7 @@
 
 .toggle-slider {
   position: relative;
+  cursor: pointer;
   width: 44px;
   height: 24px;
   background-color: #ccc;
@@ -44,6 +44,6 @@
 }
 
 .toggle-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #333;
 }

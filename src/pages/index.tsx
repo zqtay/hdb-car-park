@@ -1,3 +1,5 @@
+import "./styles.css";
+
 import { useMemo, useState } from 'react';
 import Map from '../components/map';
 import { useCarParkMapLayer, useCarParkMarker, useFetchData } from "./hooks";
@@ -19,27 +21,18 @@ const AppPage = () => {
   const { areaLayer, zoneLayer } = useCarParkMapLayer({ data: filteredData, area, zone });
 
   return (<>
-    <div style={{
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      zIndex: 1000,
-      background: 'white',
-      padding: '10px 15px',
-      borderRadius: 8,
-      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-    }}>
+    {zoom >= ZoomLevel.Subzone && <div className='toggle-switch-container'>
       <ToggleSwitch
         checked={showUnavailable}
         onChange={setShowUnavailable}
         label="Show unavailable"
       />
-    </div>
+    </div>}
     <Map
       center={defaultCenter}
       zoom={zoom}
-      height={"100vh"}
-      width={"100vw"}
+      height={"100dvh"}
+      width={"100dvw"}
       onZoom={setZoom}
       onBoundsChange={setBounds}
     >
