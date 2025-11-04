@@ -11,11 +11,11 @@ import Worker from '../workers/carpark?worker';
 
 // Color scale, from green = 100% to red = 0%, step = 5
 const colorScale = [
-  "rgb(255, 0, 0)",    // 1.0
-  "rgb(255, 127, 0)",  // 0.75
+  "rgb(255, 0, 0)",    // 0
+  "rgb(255, 127, 0)",  // 0.25
   "rgb(255, 255, 0)",  // 0.5
-  "rgb(127, 255, 0)",  // 0.25
-  "rgb(0, 255, 0)",    // 0.0
+  "rgb(127, 255, 0)",  // 0.75
+  "rgb(0, 255, 0)",    // 1
 ];
 
 const getCapacityColor = (value?: number, total?: number) => {
@@ -152,7 +152,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
         </div>
       </>;
 
-      const fillColor = info.address.includes("PAKU") ? `rgb(0,0,255,0.5)` : getCapacityColor(availableLots, totalLots) ?? `rgb(0,0,0,0.5)`;
+      const fillColor = getCapacityColor(availableLots, totalLots) ?? `rgb(0,0,0,0.5)`;
 
       return <CircleMarker
         key={`${info.car_park_no}-${info.address}-${index}`}

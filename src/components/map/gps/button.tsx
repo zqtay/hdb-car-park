@@ -1,7 +1,7 @@
 import React, { useEffect, useState, type MouseEvent } from 'react';
 import { useMap, useMapEvents } from 'react-leaflet';
-import { useGPS } from '../../context/gps';
-import { log } from '../../lib/utils';
+import { useGPS } from '../../../context/gps';
+import { log } from '../../../lib/utils';
 
 interface GPSCenterButtonProps {
   className?: string;
@@ -11,6 +11,7 @@ export const GPSCenterButton: React.FC<GPSCenterButtonProps> = ({ className }) =
   const map = useMap();
   const { gpsData, isLoading, watchLocation, permissionState } = useGPS();
   const [isTracking, setIsTracking] = useState(false);
+  const [isInitial, setIsInitial] = useState(true);
 
   // Listen for manual map interactions
   useMapEvents({
@@ -30,9 +31,10 @@ export const GPSCenterButton: React.FC<GPSCenterButtonProps> = ({ className }) =
 
   // Enable tracking when GPS location first becomes available
   useEffect(() => {
-    if (gpsData.coordinates && !isTracking) {
+    if (gpsData.coordinates && !isTracking && isInitial) {
       log('[Map] GPS location available, enabling tracking');
       setIsTracking(true);
+      setIsInitial(false);
     }
   }, [gpsData.coordinates]);
 

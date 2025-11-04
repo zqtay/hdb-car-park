@@ -1,6 +1,6 @@
 import { useMapEvents } from 'react-leaflet';
-import type { MapBounds } from './types';
-import { log } from '../../lib/utils';
+import type { MapBounds } from '../types';
+import { log } from '../../../lib/utils';
 
 interface BoundsHandlerProps {
   onBoundsChange?: (bounds: MapBounds) => void;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMap } from 'react-leaflet';
-import { log } from '../../lib/utils';
+import { log } from '../../../lib/utils';
 
 export type MapTileType = 'map' | 'satellite';
 

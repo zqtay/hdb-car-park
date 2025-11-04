@@ -16,10 +16,5 @@ export type MapProps = {
   onBoundsChange?: (bounds: MapBounds) => void;
   height?: string | number;
   width?: string | number;
-  position?: {
-    latitude: number;
-    longitude: number;
-    heading?: number | null;
-  } | null;
   children?: any;
 };

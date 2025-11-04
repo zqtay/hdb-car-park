@@ -1,16 +1,16 @@
 import { type FC, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ScaleControl } from 'react-leaflet';
+import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import type { MapProps } from './types';
-import { getPositionIcon } from './icons';
-import { ZoomHandler } from "./zoom";
-import { BoundsHandler } from "./bounds";
-import { GPSCenterButton } from "./gps-button";
-import { MapTileToggle, tileLayerConfig, type MapTileType } from "./tile-toggle";
+import { ZoomHandler } from "./ui/zoom";
+import { BoundsHandler } from "./ui/bounds";
+import { GPSCenterButton } from "./gps/button";
+import { MapTileToggle, tileLayerConfig, type MapTileType } from "./ui/tile-toggle";
+import { PositionIcon } from './gps/icon';
 
 const Map: FC<MapProps> = ({
-  center, zoom, position, height, width, onZoom, onBoundsChange, children
+  center, zoom, height, width, onZoom, onBoundsChange, children
 }) => {
   const [currentTile, setCurrentTile] = useState<MapTileType>('map');
 
@@ -38,15 +38,8 @@ const Map: FC<MapProps> = ({
       <BoundsHandler onBoundsChange={onBoundsChange} />
       <MapTileToggle onTileChange={handleTileChange} />
       <GPSCenterButton />
+      <PositionIcon />
       <ScaleControl position="bottomleft" />
-      {position && (
-        <Marker
-          position={[position.latitude, position.longitude]}
-          icon={getPositionIcon(position.heading ?? 0)}
-        >
-          <Popup>Your Position</Popup>
-        </Marker>
-      )}
       {children}
     </MapContainer>
   );

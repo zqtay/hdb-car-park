@@ -1,4 +1,6 @@
 import L from "leaflet";
+import { Marker } from "react-leaflet";
+import { useGPS } from "../../../context/gps";
 
 export const getPositionIcon = (rotate: number) => {
   const icon = L.divIcon({
@@ -12,4 +14,14 @@ export const getPositionIcon = (rotate: number) => {
     iconAnchor: [20, 20],
   });
   return icon;
+};
+
+export const PositionIcon = () => {
+  const { gpsData: { coordinates } } = useGPS();
+  if (!coordinates) return null;
+  return <Marker
+    position={[coordinates.latitude, coordinates.longitude]}
+    icon={getPositionIcon(coordinates.heading ?? 0)}
+  >
+  </Marker>;
 };
