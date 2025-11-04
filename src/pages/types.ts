@@ -18,8 +18,9 @@ export type CarParkData = {
 
 export type CarParkRegionData = {
   feature: GeoJsonData;
+  info: Record<string, any>,
   lots: {
-    available: number;
-    total: number;
+    available?: number;
+    total?: number;
   };
 };

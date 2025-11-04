@@ -1,9 +1,10 @@
 import { isPointWithinArea } from "../lib/map";
 import type { GeoJsonData } from "../lib/map/types";
-import type { CarParkData } from "../pages/types";
+import { extractHtmlTable } from "../lib/utils";
+import type { CarParkData, CarParkRegionData } from "../pages/types";
 import { WorkerOperation } from "./types";
 
-const getCarParkRegionCapcity = (data: CarParkData[], area?: GeoJsonData[]) => {
+const getCarParkRegionCapacity = (data: CarParkData[], area?: GeoJsonData[]): CarParkRegionData[] | undefined => {
   return area?.map(feature => {
     // Get car parks within area
     const carParksInArea = data.filter(({ position }) => {
@@ -19,7 +20,10 @@ const getCarParkRegionCapcity = (data: CarParkData[], area?: GeoJsonData[]) => {
       const total = cur.availability?.carpark_info.reduce((a, c) => a + parseInt(c.total_lots), 0) || 0;
       return acc + total;
     }, 0) : undefined;
+    const info = extractHtmlTable(feature.properties?.Description || "");
+    info.carparks = carParksInArea;
     return {
+      info,
       feature,
       lots: {
         available: availableLots,
@@ -34,11 +38,11 @@ self.onmessage = (e: MessageEvent<any>) => {
   let result: any = { operation };
   if (operation === WorkerOperation.GetAreaCapacity) {
     const { carParkData, areaData } = data;
-    const regionCapacity = getCarParkRegionCapcity(carParkData, areaData);
+    const regionCapacity = getCarParkRegionCapacity(carParkData, areaData);
     result.data = regionCapacity;
   } else if (operation === WorkerOperation.GetZoneCapacity) {
     const { carParkData, zoneData } = data;
-    const regionCapacity = getCarParkRegionCapcity(carParkData, zoneData);
+    const regionCapacity = getCarParkRegionCapacity(carParkData, zoneData);
     result.data = regionCapacity;
   }
   self.postMessage(result);

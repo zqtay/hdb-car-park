@@ -156,7 +156,6 @@
   transition: all 0.2s ease;
   border: none;
   cursor: pointer;
-  min-width: 60px;
   text-align: center;
 }
 

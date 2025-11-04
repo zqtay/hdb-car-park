@@ -6,10 +6,10 @@ const getCarParkInfo = async (offset?: number, limit?: number): Promise<CarParkI
   const datasetId = "d_23f946fa557947f93a8043bbef41dd09";
   let url = "https://data.gov.sg/api/action/datastore_search?resource_id=" + datasetId;
   if (offset !== undefined) {
-    url += `&&offset=${offset}`;
+    url += `&offset=${offset}`;
   }
   if (limit !== undefined) {
-    url += `&&limit=${limit}`;
+    url += `&limit=${limit}`;
   }
   const res = await fetch(url);
   const data = res.json();

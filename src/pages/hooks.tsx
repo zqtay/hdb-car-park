@@ -20,7 +20,7 @@ const colorScale = [
 
 const getCapacityColor = (value?: number, total?: number) => {
   if (value === undefined || total === undefined) {
-    return `rgb(0,0,0,0.5)`; // Gray for unknown
+    return;
   }
   const percentage = value / total;
   const index = Math.floor(percentage * (colorScale.length - 1));
@@ -33,7 +33,12 @@ export const useCarParkInfo = () => {
 
   const fetchRecursive = async (offset = 0) => {
     const data = await DataGovService.getCarParkInfo(offset, 1000);
-    setData(prev => [...prev, ...data.result.records]);
+    const carparkData = data?.result?.records;
+    setData(prev => {
+      // Avoid duplicates
+      const prevRecords = prev.filter(record => !carparkData.some(r => r.car_park_no === record.car_park_no));
+      return [...prevRecords, ...carparkData];
+    });
     if (data.result.records.length + offset < data.result.total) {
       await fetchRecursive(offset + data.result.records.length);
     }
@@ -137,7 +142,7 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
       // Popup text
       const popup = <>
         <div style={{ fontWeight: "bold" }}>
-          {info.address} <span style={{ fontSize: "0.75rem" }}>{info.car_park_no}</span>
+          {info.car_park_no} - {info.address}
         </div>
         <div>
           {`Available Lots: ${availableLots ?? "N/A"}`}
@@ -146,11 +151,14 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
           {`Total Lots: ${totalLots ?? "N/A"}`}
         </div>
       </>;
+
+      const fillColor = info.address.includes("PAKU") ? `rgb(0,0,255,0.5)` : getCapacityColor(availableLots, totalLots) ?? `rgb(0,0,0,0.5)`;
+
       return <CircleMarker
         key={`${info.car_park_no}-${info.address}-${index}`}
         center={position}
         stroke={false}
-        fillColor={getCapacityColor(availableLots, totalLots)}
+        fillColor={fillColor}
         fillOpacity={0.5}
       >
         <Popup>{popup}</Popup>
@@ -164,18 +172,37 @@ export const useCarParkMarker = (data: CarParkData[], bounds: MapBounds | undefi
 export const useCarParkRegionLayer = (data: CarParkRegionData[]) => {
   const components = useMemo(() => {
     return data?.map((d, index) => {
+      const popup = <>
+        <div style={{ fontWeight: "bold" }}>
+          {d.info.REGION_N} - {d.info.SUBZONE_N ?? d.info.PLN_AREA_N}
+        </div>
+        <div>
+          {`Available Lots: ${d.lots.available ?? "N/A"}`}
+        </div>
+        <div>
+          {`Total Lots: ${d.lots.total ?? "N/A"}`}
+        </div>
+        <div>
+          Car Parks: {!d.info.carparks?.length && "N/A"}
+          <ul>
+            {d.info.carparks?.map((cp: CarParkData) => <li>{cp.info.address}</li>)}
+          </ul>
+        </div>
+      </>;
       return <GeoJSON
         key={`${d.feature.properties.Name}-${index}`}
         data={d.feature}
         style={
           {
-            color: "#00000040",
-            fillColor: getCapacityColor(d.lots.available, d.lots.total),
+            color: `rgb(0,0,0,0.3)`,
+            fillColor: getCapacityColor(d.lots.available, d.lots.total) ?? "transparent",
             weight: 2,
             fillOpacity: 0.5,
           }
         }
-      />;
+      >
+        <Popup>{popup}</Popup>
+      </GeoJSON>;
     });
   }, [data]);
 
