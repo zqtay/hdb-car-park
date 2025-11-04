@@ -7,10 +7,17 @@ import { getPositionIcon } from './icons';
 import { ZoomHandler } from "./zoom";
 import { BoundsHandler } from "./bounds";
 import { GPSCenterButton } from "./gps-button";
+import { MapTileToggle, tileLayerConfig, type MapTileType } from "./tile-toggle";
 
 const Map: FC<MapProps> = ({
   center, zoom, position, height, width, onZoom, onBoundsChange, children
 }) => {
+  const [currentTile, setCurrentTile] = useState<MapTileType>('map');
+
+  const handleTileChange = (tile: MapTileType) => {
+    setCurrentTile(tile);
+  };
+
   return (
     <MapContainer
       center={center}
@@ -23,11 +30,13 @@ const Map: FC<MapProps> = ({
       zoomDelta={0.25}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        key={currentTile}
+        attribution={tileLayerConfig[currentTile].attribution}
+        url={tileLayerConfig[currentTile].url}
       />
       <ZoomHandler onZoom={onZoom} />
       <BoundsHandler onBoundsChange={onBoundsChange} />
+      <MapTileToggle onTileChange={handleTileChange} />
       <GPSCenterButton />
       <ScaleControl position="bottomleft" />
       {position && (
