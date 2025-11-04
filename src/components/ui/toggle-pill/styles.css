@@ -11,6 +11,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
+  z-index: 1000;
 }
 
 /* Hide the default checkbox */

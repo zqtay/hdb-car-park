@@ -42,7 +42,7 @@
 /* Car Park Search Styles */
 .carpark-search {
   position: absolute;
-  z-index: 1000;
+  z-index: 1100;
   width: 100dvw;
   max-width: 600px;
 }
@@ -64,6 +64,7 @@
   background-clip: padding-box;
   outline: none;
   transition: all 0.2s ease;
+  color: black;
 }
 
 .carpark-search-input:focus {
@@ -114,7 +115,7 @@
   border-radius: 0 0 4px 4px;
   max-height: 70dvh;
   overflow-y: auto;
-  z-index: 1001;
+  z-index: 1100;
 }
 
 .carpark-search-item {
